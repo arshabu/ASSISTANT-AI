@@ -1,0 +1,15 @@
+{
+  "name": "febian-ai",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6",
+    "electron": "^42.1.0",
+    "express": "^5.2.1",
+    "say": "^0.16.0"
+  }
+}

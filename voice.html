@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>FEBIAN AI</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+
+      height:100vh;
+
+      overflow:hidden;
+
+      background:
+      radial-gradient(circle at top,
+      #07111f,
+      #000000);
+
+      font-family:Arial;
+
+      display:flex;
+
+      justify-content:center;
+
+      align-items:center;
+
+      color:white;
+    }
+
+    body::before{
+
+      content:"";
+
+      position:absolute;
+
+      width:700px;
+      height:700px;
+
+      background:
+      rgba(0,255,255,0.08);
+
+      border-radius:50%;
+
+      filter:blur(120px);
+
+      animation:pulse 4s infinite;
+    }
+
+    @keyframes pulse{
+
+      0%{
+        transform:scale(1);
+      }
+
+      50%{
+        transform:scale(1.1);
+      }
+
+      100%{
+        transform:scale(1);
+      }
+    }
+
+    .container{
+
+      position:relative;
+
+      width:550px;
+
+      padding:40px;
+
+      border-radius:30px;
+
+      text-align:center;
+
+      backdrop-filter:blur(15px);
+
+      background:
+      rgba(255,255,255,0.04);
+
+      border:
+      1px solid rgba(0,255,255,0.2);
+
+      box-shadow:
+      0 0 60px rgba(0,255,255,0.2);
+    }
+
+    h1{
+
+      letter-spacing:5px;
+
+      margin-bottom:15px;
+
+      color:#00ffff;
+
+      text-shadow:
+      0 0 20px #00ffff;
+    }
+
+    #status{
+
+      margin-bottom:20px;
+
+      font-size:15px;
+
+      color:gray;
+
+      letter-spacing:2px;
+
+      transition:0.3s;
+    }
+
+    .orb{
+
+      width:180px;
+
+      height:180px;
+
+      margin:auto;
+
+      border-radius:50%;
+
+      background:
+      radial-gradient(circle,
+      #00ffff,
+      #001b2e);
+
+      box-shadow:
+      0 0 50px #00ffff,
+      0 0 100px rgba(0,255,255,0.5);
+
+      animation:
+      rotateOrb 8s linear infinite,
+      pulseOrb 2s infinite;
+    }
+
+    @keyframes rotateOrb{
+
+      0%{
+        transform:rotate(0deg);
+      }
+
+      100%{
+        transform:rotate(360deg);
+      }
+    }
+
+    @keyframes pulseOrb{
+
+      0%{
+        transform:scale(1);
+      }
+
+      50%{
+        transform:scale(1.05);
+      }
+
+      100%{
+        transform:scale(1);
+      }
+    }
+
+    .wave{
+
+      display:flex;
+
+      justify-content:center;
+
+      align-items:center;
+
+      gap:6px;
+
+      height:80px;
+
+      margin-top:30px;
+    }
+
+    .bar{
+
+      width:7px;
+
+      height:15px;
+
+      background:#00ffff;
+
+      border-radius:20px;
+
+      box-shadow:
+      0 0 10px #00ffff;
+    }
+
+    #text{
+
+      margin-top:25px;
+
+      font-size:18px;
+
+      color:white;
+
+      min-height:50px;
+
+      line-height:1.5;
+    }
+
+    .footer{
+
+      margin-top:25px;
+
+      opacity:0.5;
+
+      font-size:12px;
+
+      letter-spacing:2px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>FEBIAN AI</h1>
+
+  <div id="status">
+
+    SLEEPING
+
+  </div>
+
+  <div class="orb"></div>
+
+  <div class="wave">
+
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+
+  </div>
+
+  <div id="text">
+
+    Say "Hey FEBIAN"
+    or clap twice 👏👏
+
+  </div>
+
+  <div class="footer">
+
+    F.E.B.I.A.N SYSTEM ONLINE
+
+  </div>
+
+</div>
+
+<script>
+
+  /* =========================
+     🎤 SPEECH RECOGNITION
+  ========================== */
+
+  const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+  const recognition =
+  new SpeechRecognition();
+
+  recognition.continuous = true;
+
+  recognition.interimResults = false;
+
+  recognition.lang = "en-US";
+
+  /* =========================
+     🌍 LANGUAGES
+  ========================== */
+
+  const languages = {
+
+    english : "en-US",
+
+    tamil : "ta-IN",
+
+    hindi : "hi-IN",
+
+    telugu : "te-IN"
+  };
+
+  /* =========================
+     🔥 VARIABLES
+  ========================== */
+
+  let isActive = false;
+
+  let clapCount = 0;
+
+  let lastClapTime = 0;
+
+  let isSpeaking = false;
+
+  const statusText =
+  document.getElementById("status");
+
+  const textOutput =
+  document.getElementById("text");
+
+  const bars =
+  document.querySelectorAll(".bar");
+
+  /* =========================
+     🔊 SPEAK FUNCTION
+  ========================== */
+
+  function speak(text){
+
+    speechSynthesis.cancel();
+
+    isSpeaking = true;
+
+    const msg =
+    new SpeechSynthesisUtterance(text);
+
+    msg.rate = 1;
+
+    msg.pitch = 1;
+
+    msg.volume = 1;
+
+    msg.onend = () => {
+
+      isSpeaking = false;
+    };
+
+    speechSynthesis.speak(msg);
+  }
+
+  /* =========================
+     🌊 ANIMATION
+  ========================== */
+
+  function animateBars(){
+
+    bars.forEach(bar => {
+
+      const random =
+      Math.random() * 70 + 10;
+
+      bar.style.height =
+      random + "px";
+    });
+  }
+
+  setInterval(
+    animateBars,
+    150
+  );
+
+  /* =========================
+     👋 GREETING
+  ========================== */
+
+  function greetUser(){
+
+    const hour =
+    new Date().getHours();
+
+    if(hour < 12){
+
+      speak(
+      "Good morning boss"
+      );
+    }
+
+    else if(hour < 18){
+
+      speak(
+      "Good afternoon boss"
+      );
+    }
+
+    else{
+
+      speak(
+      "Good evening boss"
+      );
+    }
+  }
+
+  /* =========================
+     👏 CLAP DETECTION
+  ========================== */
+
+  async function startClapDetection(){
+
+    try{
+
+      const stream =
+      await navigator
+      .mediaDevices
+      .getUserMedia({
+        audio:true
+      });
+
+      const audioContext =
+      new AudioContext();
+
+      const microphone =
+      audioContext
+      .createMediaStreamSource(stream);
+
+      const analyser =
+      audioContext.createAnalyser();
+
+      microphone.connect(analyser);
+
+      const dataArray =
+      new Uint8Array(
+        analyser.frequencyBinCount
+      );
+
+      function detect(){
+
+        analyser.getByteFrequencyData(
+          dataArray
+        );
+
+        let volume = 0;
+
+        for(let i=0;
+        i<dataArray.length;
+        i++){
+
+          volume += dataArray[i];
+        }
+
+        volume =
+        volume / dataArray.length;
+
+        if(volume > 80){
+
+          const now =
+          Date.now();
+
+          if(now - lastClapTime < 700){
+
+            clapCount++;
+          }
+
+          else{
+
+            clapCount = 1;
+          }
+
+          lastClapTime = now;
+
+          if(clapCount >= 2){
+
+            if(!isActive){
+
+              isActive = true;
+
+              statusText.innerText =
+              "LISTENING";
+
+              textOutput.innerText =
+              "FEBIAN ACTIVATED";
+
+              greetUser();
+            }
+
+            clapCount = 0;
+          }
+        }
+
+        requestAnimationFrame(detect);
+      }
+
+      detect();
+
+    }
+
+    catch(err){
+
+      console.log(
+      "Mic Error:",
+      err
+      );
+    }
+  }
+
+  /* =========================
+     🧠 OLLAMA AI
+  ========================== */
+
+  async function askAI(prompt){
+
+    try{
+
+      const response =
+      await fetch(
+      "http://localhost:11434/api/generate",
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":
+          "application/json"
+        },
+
+        body:JSON.stringify({
+
+          model:"tinyllama",
+
+          prompt:prompt,
+
+          stream:false
+        })
+      });
+
+      const data =
+      await response.json();
+
+      return data.response ||
+      "No response";
+
+    }
+
+    catch(err){
+
+      console.log(err);
+
+      return
+      "AI server not responding";
+    }
+  }
+
+  /* =========================
+     🚀 START RECOGNITION
+  ========================== */
+
+  function startRecognition(){
+
+    try{
+
+      recognition.start();
+
+    }
+
+    catch(err){
+
+      console.log(
+      "Recognition already running"
+      );
+    }
+  }
+
+  startRecognition();
+
+  /* =========================
+     🎤 MAIN VOICE SYSTEM
+  ========================== */
+
+  recognition.onresult =
+  async function(event){
+
+    if(isSpeaking) return;
+
+    const command =
+    event.results[
+    event.results.length - 1
+    ][0]
+    .transcript
+    .toLowerCase()
+    .trim();
+
+    console.log(
+    "USER:",
+    command
+    );
+
+    textOutput.innerText =
+    command;
+
+    /* ======================
+       🔥 WAKE SYSTEM
+    ====================== */
+
+    if(command.includes(
+      "hey febian"
+    )){
+
+      isActive = true;
+
+      statusText.innerText =
+      "LISTENING";
+
+      greetUser();
+
+      return;
+    }
+
+    /* ======================
+       😴 SLEEP MODE
+    ====================== */
+
+    if(command.includes(
+      "sleep febian"
+    )){
+
+      isActive = false;
+
+      statusText.innerText =
+      "SLEEPING";
+
+      speak(
+      "Going to sleep boss"
+      );
+
+      return;
+    }
+
+    /* ======================
+       ❌ IGNORE
+    ====================== */
+
+    if(!isActive){
+
+      return;
+    }
+
+    /* ======================
+       🌍 LANGUAGE
+    ====================== */
+
+    if(command.includes(
+      "change language to tamil"
+    )){
+
+      recognition.stop();
+
+      recognition.lang =
+      languages.tamil;
+
+      startRecognition();
+
+      speak(
+      "Tamil language activated"
+      );
+
+      return;
+    }
+
+    if(command.includes(
+      "change language to english"
+    )){
+
+      recognition.stop();
+
+      recognition.lang =
+      languages.english;
+
+      startRecognition();
+
+      speak(
+      "English language activated"
+      );
+
+      return;
+    }
+
+    /* ======================
+       🚀 SERVER COMMANDS
+    ====================== */
+
+    try{
+
+      statusText.innerText =
+      "PROCESSING";
+
+      const response =
+      await fetch(
+
+        `http://localhost:3000/command?text=${encodeURIComponent(command)}`
+
+      );
+
+      const result =
+      await response.text();
+
+      console.log(
+      "SERVER:",
+      result
+      );
+
+      if(
+        result &&
+        result !==
+        "Command not found"
+      ){
+
+        textOutput.innerText =
+        result;
+
+        speak(result);
+
+        statusText.innerText =
+        "LISTENING";
+
+        return;
+      }
+
+    }
+
+    catch(error){
+
+      console.log(
+      "SERVER ERROR:",
+      error
+      );
+    }
+
+    /* ======================
+       🧠 AI MODE
+    ====================== */
+
+    statusText.innerText =
+    "THINKING";
+
+    textOutput.innerText =
+    "Thinking...";
+
+    const reply =
+    await askAI(command);
+
+    textOutput.innerText =
+    reply;
+
+    speak(reply);
+
+    statusText.innerText =
+    "LISTENING";
+  };
+
+  /* =========================
+     🔄 AUTO RESTART
+  ========================== */
+
+  recognition.onend = () => {
+
+    console.log(
+    "Restarting recognition..."
+    );
+
+    startRecognition();
+  };
+
+  recognition.onerror =
+  (event) => {
+
+    console.log(
+    "Speech Error:",
+    event.error
+    );
+  };
+
+  /* =========================
+     🚀 START CLAP
+  ========================== */
+
+  startClapDetection();
+
+</script>
+
+</body>
+</html>
